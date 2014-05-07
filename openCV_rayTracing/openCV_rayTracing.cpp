@@ -12,14 +12,8 @@ const int WIDTH = 400,
 		  HEIGHT = 200;
 const char TITLE[] = "OpenCV_rayTracing";
 cv::Mat screen = cv::Mat::zeros(HEIGHT, WIDTH, CV_8UC3);
-void draw_pixel(int x, int y, cv::Scalar color) {
-    //printf("drawPixel(%d, %d)\n", x, y);
+void draw_pixel(int x, int y, const cv::Scalar &color) {
 	circle(screen, cv::Point(x, y), 0, color);
-}
-
-sdk::Vector xmul(const sdk::Vector &u, const sdk::Vector &v) {
-    assert(u.size() == 3 && v.size() == 3);
-    return sdk::Vector(u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]);
 }
 
 int _tmain(int argc, _TCHAR* argv[])
@@ -28,7 +22,7 @@ int _tmain(int argc, _TCHAR* argv[])
     sdk::Camera *camera = new sdk::Camera;
     camera->scene = new sdk::GOScene;
 
-    /*sdk::GOSphere *sphere = new sdk::GOSphere;
+    sdk::GOSphere *sphere = new sdk::GOSphere;
     sphere->Pc = sdk::Vertex(200,30,-10*sdk::sqrt(3));
     sphere->reflection_coefficient = 0.6;
     sphere->r = 40;
@@ -37,7 +31,6 @@ int _tmain(int argc, _TCHAR* argv[])
     sphere->refraction_index = 1.414;
     sphere->refraction_coefficient = 0.2;
     camera->scene->geometric_object_ptr_vec.push_back(sphere);
-
     sdk::GOSphere *sphere2 = new sdk::GOSphere;
     sphere2->Pc = sdk::Vertex(200,-30,-10*sdk::sqrt(3));
     sphere2->reflection_coefficient = 0.6;
@@ -64,18 +57,8 @@ int _tmain(int argc, _TCHAR* argv[])
     light->transparency = 0;
     light->refraction_index = 1;
     light->refraction_coefficient = 0;
-    camera->scene->geometric_object_ptr_vec.push_back(light);*/
-
-    /*sdk::GOTriangle *triangle = new sdk::GOTriangle;
-    triangle->P0 = sdk::Vertex(1000,0,0);//WIDTH/2,WIDTH,0);
-    triangle->P1 = sdk::Vertex(1000,4000,0);//WIDTH/2, 10*WIDTH, 0);
-    triangle->P2 = sdk::Vertex(1000,0,2000);//WIDTH/2, 0, 10*HEIGHT);
-    triangle->P = triangle->P0;
-    triangle->n = xmul(triangle->P1 - triangle->P0, triangle->P2 - triangle->P0);
-    triangle->reflection_coefficient = 0.9;
-    triangle->bgra = sdk::BGRa(10, 10, 10);
-    camera->scene->geometric_object_ptr_vec.push_back(triangle);*/
-    /*sdk::GOPlane *plane1 = new sdk::GOPlane;
+    camera->scene->geometric_object_ptr_vec.push_back(light);
+    sdk::GOPlane *plane1 = new sdk::GOPlane;
     plane1->P = sdk::Vertex(500, 0, 0);
     plane1->n = sdk::Vector(1, 1, 0);
     plane1->bgra = sdk::BGRa(0, 0, 0);
@@ -96,25 +79,35 @@ int _tmain(int argc, _TCHAR* argv[])
     sdk::GOPlane *plane = new sdk::GOPlane;
     plane->P = sdk::Vertex(0, 0, -HEIGHT/2);
     plane->n = sdk::Vector(0, 0, 1);
-    plane->bgra = sdk::BGRa(0, 0, 0);
-    plane->reflection_coefficient = 0.9;
-    plane->refraction_coefficient = 0.0;
-    plane->refraction_index = 1.414;
+    plane->bgra = sdk::BGRa(100, 100, 100);
+    plane->reflection_coefficient = 0.3;
+    plane->refraction_coefficient = 0.9;
+    plane->refraction_index = 1.333;
     plane->transparency = 0.2;
-    camera->scene->geometric_object_ptr_vec.push_back(plane);*/
+    camera->scene->geometric_object_ptr_vec.push_back(plane);
+
+    /*sdk::GOTriangle *triangle = new sdk::GOTriangle;
+    triangle->P0 = sdk::Vertex(1000,0,0);//WIDTH/2,WIDTH,0);
+    triangle->P1 = sdk::Vertex(1000,4000,0);//WIDTH/2, 10*WIDTH, 0);
+    triangle->P2 = sdk::Vertex(1000,0,2000);//WIDTH/2, 0, 10*HEIGHT);
+    triangle->P = triangle->P0;
+    triangle->n = xmul(triangle->P1 - triangle->P0, triangle->P2 - triangle->P0);
+    triangle->reflection_coefficient = 0.9;
+    triangle->bgra = sdk::BGRa(10, 10, 10);
+    camera->scene->geometric_object_ptr_vec.push_back(triangle);*/
 
     sdk::Vertex observer(0, 0, HEIGHT/4);
     sdk::Rectangle window;
     window.P = sdk::Vertex(110,-WIDTH/2,HEIGHT/2);
-    window.xy_vec.push_back(sdk::Vector(0, WIDTH, 0));
-    window.xy_vec.push_back(sdk::Vector(0, 0, -HEIGHT));
+    window.x = sdk::Vector(0, WIDTH, 0);
+    window.y = sdk::Vector(0, 0, -HEIGHT);
 
-    cv::namedWindow(TITLE);
     std::vector<std::vector<sdk::BGRa> > image(WIDTH, std::vector<sdk::BGRa>(HEIGHT));
     camera->get_image(observer, window, image);
     for (int x = 0; x < WIDTH; x++)
         for (int y = 0; y < HEIGHT; y++)
             draw_pixel(x, y, image[x][y]);
+    cv::namedWindow(TITLE);
     imshow(TITLE, screen);
     cv::waitKey(0);
 
